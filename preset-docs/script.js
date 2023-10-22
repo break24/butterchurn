@@ -10,7 +10,6 @@ addEventListener("DOMContentLoaded", (event) => {
     var presets = {};
     var presetKeys = [];
     var presetIndexHist = [];
-    var presetIndex = 0;
     var canvas = document.getElementById("canvas");
 
     // defaults
@@ -19,6 +18,16 @@ addEventListener("DOMContentLoaded", (event) => {
     var presetRandom = false;
     const canvasWidth = 1280;
     const canvasHight = 720;
+    let audioFiles = [];
+
+    // querystrng
+    const queryString = window.location.search;
+    const urlParams = new URLSearchParams(queryString);
+    const presetIndexFromQueryString = urlParams.get("preset");
+
+    var presetIndex = presetIndexFromQueryString
+      ? parseInt(presetIndexFromQueryString) - 1
+      : 0;
 
     function connectToAudioAnalyzer(sourceNode) {
       if (delayedAudible) {
@@ -56,7 +65,7 @@ addEventListener("DOMContentLoaded", (event) => {
       sourceNode.start(0);
     }
 
-    function loadLocalFiles(files, index = 0) {
+    function loadLocalFiles(index = 0) {
       audioContext.resume();
 
       var reader = new FileReader();
@@ -65,8 +74,8 @@ addEventListener("DOMContentLoaded", (event) => {
           playBufferSource(buf);
 
           setTimeout(() => {
-            if (files.length > index + 1) {
-              loadLocalFiles(files, index + 1);
+            if (audioFiles.length > index + 1) {
+              loadLocalFiles(index + 1);
             } else {
               sourceNode.disconnect();
               sourceNode = null;
@@ -76,21 +85,13 @@ addEventListener("DOMContentLoaded", (event) => {
         });
       };
 
-      var file = files[index];
+      var file = audioFiles[index];
+      const nowRunning = document.getElementById("now-running");
+      nowRunning.innerHTML = file.name;
       reader.readAsArrayBuffer(file);
     }
 
-    function connectMicAudio(sourceNode, audioContext) {
-      audioContext.resume();
-
-      var gainNode = audioContext.createGain();
-      gainNode.gain.value = 1.25;
-      sourceNode.connect(gainNode);
-
-      visualizer.connectAudio(gainNode);
-      startRenderer();
-    }
-
+    //#region set presets
     function nextPreset(blendTime = 5.7) {
       presetIndexHist.push(presetIndex);
 
@@ -100,8 +101,7 @@ addEventListener("DOMContentLoaded", (event) => {
       } else {
         presetIndex = (presetIndex + 1) % numPresets;
       }
-      visualizer.loadPreset(presets[presetKeys[presetIndex]], blendTime);
-      window.$("#presetSelect").val(presetIndex);
+      setPreset(blendTime);
     }
 
     function prevPreset(blendTime = 5.7) {
@@ -111,10 +111,17 @@ addEventListener("DOMContentLoaded", (event) => {
       } else {
         presetIndex = (presetIndex - 1 + numPresets) % numPresets;
       }
-
-      visualizer.loadPreset(presets[presetKeys[presetIndex]], blendTime);
-      window.$("#presetSelect").val(presetIndex);
+      setPreset(blendTime);
     }
+
+    const setPreset = (blendTime) => {
+      document.title = presetKeys[presetIndex];
+      visualizer.loadPreset(presets[presetKeys[presetIndex]], blendTime);
+
+      console.log(presets[presetKeys[presetIndex]]);
+
+      window.$("#presetSelect").val(presetIndex);
+    };
 
     function restartCycleInterval() {
       if (cycleInterval) {
@@ -126,21 +133,11 @@ addEventListener("DOMContentLoaded", (event) => {
         cycleInterval = setInterval(() => nextPreset(2.7), presetCycleLength);
       }
     }
-
-    window.$(document).keydown((e) => {
-      if (e.which === 32 || e.which === 39) {
-        nextPreset();
-      } else if (e.which === 8 || e.which === 37) {
-        prevPreset();
-      } else if (e.which === 72) {
-        nextPreset(0);
-      }
-    });
-
     window.$("#presetSelect").change((evt) => {
       presetIndexHist.push(presetIndex);
       presetIndex = parseInt(window.$("#presetSelect").val());
-      visualizer.loadPreset(presets[presetKeys[presetIndex]], 5.7);
+
+      setPreset(5.7);
     });
 
     window.$("#presetCycle").change(() => {
@@ -160,7 +157,21 @@ addEventListener("DOMContentLoaded", (event) => {
     window.$("#presetRandom").change(() => {
       presetRandom = window.$("#presetRandom").is(":checked");
     });
+    //#endregion
 
+    //#region keys
+    window.$(document).keydown((e) => {
+      if (e.which === 32 || e.which === 39) {
+        nextPreset();
+      } else if (e.which === 8 || e.which === 37) {
+        prevPreset();
+      } else if (e.which === 72) {
+        nextPreset(0);
+      }
+    });
+    //#endregion
+
+    //#region snapshot
     window.$("#createSnapshot").click(() => {
       const filename = presetKeys[presetIndex].replace(
         /^[a-zA-Z0-9](?:[a-zA-Z0-9 ._-]*[a-zA-Z0-9])?\.[a-zA-Z0-9_-]+$/g,
@@ -177,6 +188,8 @@ addEventListener("DOMContentLoaded", (event) => {
       download.setAttribute("download", `${filename}.png`);
     });
 
+    //#endregion
+
     window.$("#localFileBut").click(function () {
       // window.$("#audioSelectWrapper").css("display", "none");
 
@@ -185,7 +198,22 @@ addEventListener("DOMContentLoaded", (event) => {
       );
 
       fileSelector[0].onchange = function (event) {
-        loadLocalFiles(fileSelector[0].files);
+        audioFiles = Array.from(fileSelector[0].files);
+        const audioSelectEl = document.getElementById("audio-select");
+        audioSelectEl.innerHTML = "";
+        audioFiles.forEach((file, index) => {
+          const optionEl = document.createElement("option");
+          optionEl.value = index;
+          optionEl.innerText = `${file.name.replace(".mp3", "")} ${
+            Math.round(file.size / 100000) / 10
+          }`;
+          audioSelectEl.appendChild(optionEl);
+        });
+        audioSelectEl.addEventListener("change", (event) => {
+          loadLocalFiles(parseInt(event.target.selectedOptions[0].value, 10));
+        });
+
+        loadLocalFiles();
       };
 
       fileSelector.click();
@@ -207,7 +235,9 @@ addEventListener("DOMContentLoaded", (event) => {
         .sortBy(([k, v]) => k.toLowerCase())
         .fromPairs()
         .value();
-      presetKeys = window._.keys(presets);
+      presetKeys = Object.keys(presets);
+
+      console.log(presetKeys[0]);
 
       var presetSelect = document.getElementById("presetSelect");
 
@@ -216,7 +246,9 @@ addEventListener("DOMContentLoaded", (event) => {
         var opt = document.createElement("option");
         opt.innerHTML = `${i + 1}/${length} ${presetKeys[i]}`;
         opt.value = i;
-        // opt.id = presetKeys[i];
+        if (i === presetIndex) {
+          opt.selected = true;
+        }
         presetSelect.appendChild(opt);
       }
 
@@ -230,9 +262,10 @@ addEventListener("DOMContentLoaded", (event) => {
           textureRatio: 1,
         }
       );
-      // presetIndex = Math.floor(Math.random() * presetKeys.length);
 
-      // nextPreset(0);
+      // presetIndex = Math.floor(Math.random() * presetKeys.length);
+      setPreset();
+      document.title = presetKeys[0];
     }
 
     initPlayer();

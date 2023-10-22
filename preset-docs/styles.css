@@ -44,6 +44,6 @@
   display: flex;
 }
 
-.audio-area{
-  min-width: 300px;
+#audio-select {
+  flex-grow: 1;
 }

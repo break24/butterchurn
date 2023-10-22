@@ -22,7 +22,7 @@
   <div id="mainWrapper">
     <nav class="navigation">
       <div id="audioSelectWrapper">
-        <button id="localFileBut">Load local files</button>
+        <button id="localFileBut">Load audio files</button>
       </div>
       <div>Cycle:
         <input type="checkbox" id="presetCycle"></input>
@@ -31,17 +31,18 @@
       <div>Random:
         <input type="checkbox" id="presetRandom"></input>
       </div>
-      <a id="download" download="image.png"><button id="createSnapshot">create snapshot</button></a>
       <div>next: right/space, previous: left/backspace, next, no blend: h</div>
+      <div style="flex-grow:1"></div>
+      <div id="now-running"></div>
+      <a id="download" download="image.png"><button id="createSnapshot">create snapshot</button></a>
     </nav>
     <div class="select-area" id="presetControls">
       <div>Preset: <select id="presetSelect"></select></div>
     </div>
     <div class="main-area">
-      <canvas id='canvas' width='1280' height='720'>
-        <div class="audio-area"></div>
+      <canvas id='canvas' width='1280' height='720'></canvas>
+      <select id="audio-select" size="40"></select>
     </div>
-    </canvas>
   </div>
 </body>
 
