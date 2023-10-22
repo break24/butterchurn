@@ -39,3 +39,11 @@
 .select-area {
   padding: 6px;
 }
+
+.main-area {
+  display: flex;
+}
+
+.audio-area{
+  min-width: 300px;
+}

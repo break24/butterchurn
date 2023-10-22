@@ -31,12 +31,16 @@
       <div>Random:
         <input type="checkbox" id="presetRandom"></input>
       </div>
-        <a id="download" download="image.png"><button id="createShanpshot">create snapshot</button></a>
+      <a id="download" download="image.png"><button id="createSnapshot">create snapshot</button></a>
+      <div>next: right/space, previous: left/backspace, next, no blend: h</div>
     </nav>
     <div class="select-area" id="presetControls">
       <div>Preset: <select id="presetSelect"></select></div>
     </div>
-    <canvas id='canvas' width='1280' height='720'>
+    <div class="main-area">
+      <canvas id='canvas' width='1280' height='720'>
+        <div class="audio-area"></div>
+    </div>
     </canvas>
   </div>
 </body>
