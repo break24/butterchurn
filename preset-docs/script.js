@@ -1,4 +1,5 @@
 addEventListener("DOMContentLoaded", (event) => {
+  const maxPresetLabelLength = 120;
   window.$(function () {
     var visualizer = null;
     var rendering = false;
@@ -10,10 +11,14 @@ addEventListener("DOMContentLoaded", (event) => {
     var presetKeys = [];
     var presetIndexHist = [];
     var presetIndex = 0;
-    var presetCycle = true;
-    var presetCycleLength = 15000;
-    var presetRandom = true;
     var canvas = document.getElementById("canvas");
+
+    // defaults
+    var presetCycle = false;
+    var presetCycleLength = 15000;
+    var presetRandom = false;
+    const canvasWidth = 1280;
+    const canvasHight = 720;
 
     function connectToAudioAnalyzer(sourceNode) {
       if (delayedAudible) {
@@ -152,32 +157,29 @@ addEventListener("DOMContentLoaded", (event) => {
     window.$("#presetRandom").change(() => {
       presetRandom = window.$("#presetRandom").is(":checked");
     });
+    window.$("#createShanpshot").click(() => {
+      console.log("##");
+      // download("test.png");
+      var download = document.getElementById("download");
+      var image = document
+        .getElementById("canvas")
+        .toDataURL("image/png")
+        .replace("image/png", "image/octet-stream");
+      download.setAttribute("href", image);
+    });
 
     window.$("#localFileBut").click(function () {
       window.$("#audioSelectWrapper").css("display", "none");
 
-      var fileSelector = window.$('<input type="file" accept="audio/*" multiple />');
+      var fileSelector = window.$(
+        '<input type="file" accept="audio/*" multiple />'
+      );
 
       fileSelector[0].onchange = function (event) {
         loadLocalFiles(fileSelector[0].files);
       };
 
       fileSelector.click();
-    });
-
-    window.$("#micSelect").click(() => {
-      window.$("#audioSelectWrapper").css("display", "none");
-
-      navigator.getUserMedia(
-        { audio: true },
-        (stream) => {
-          var micSourceNode = audioContext.createMediaStreamSource(stream);
-          connectMicAudio(micSourceNode, audioContext);
-        },
-        (err) => {
-          console.log("Error getting audio stream from getUserMedia");
-        }
-      );
     });
 
     function initPlayer() {
@@ -190,7 +192,8 @@ addEventListener("DOMContentLoaded", (event) => {
       if (window.butterchurnPresetsExtra) {
         Object.assign(presets, window.butterchurnPresetsExtra.getPresets());
       }
-      presets = window._(presets)
+      presets = window
+        ._(presets)
         .toPairs()
         .sortBy(([k, v]) => k.toLowerCase())
         .fromPairs()
@@ -202,18 +205,22 @@ addEventListener("DOMContentLoaded", (event) => {
       for (var i = 0; i < presetKeys.length; i++) {
         var opt = document.createElement("option");
         opt.innerHTML =
-          presetKeys[i].substring(0, 60) +
-          (presetKeys[i].length > 60 ? "..." : "");
+          presetKeys[i].substring(0, maxPresetLabelLength) +
+          (presetKeys[i].length > maxPresetLabelLength ? "..." : "");
         opt.value = i;
         presetSelect.appendChild(opt);
       }
 
-      visualizer = window.butterchurn.default.createVisualizer(audioContext, canvas, {
-        width: 800,
-        height: 600,
-        pixelRatio: window.devicePixelRatio || 1,
-        textureRatio: 1,
-      });
+      visualizer = window.butterchurn.default.createVisualizer(
+        audioContext,
+        canvas,
+        {
+          width: canvasWidth,
+          height: canvasHight,
+          pixelRatio: window.devicePixelRatio || 1,
+          textureRatio: 1,
+        }
+      );
       nextPreset(0);
       cycleInterval = setInterval(() => nextPreset(2.7), presetCycleLength);
     }

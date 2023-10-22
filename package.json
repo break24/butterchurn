@@ -10,6 +10,7 @@
     "dist/isSupported.min.js"
   ],
   "scripts": {
+    "start": "http-server -S -C ../../cert.pem -K ../../key.pem",
     "build": "webpack --config config/webpack.config.js --env prod",
     "dev": "webpack --config config/webpack.config.js --progress --color --watch --env dev",
     "dev-build": "webpack --config config/webpack.config.js --progress --color --env dev"

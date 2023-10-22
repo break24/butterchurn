@@ -1,27 +1,41 @@
 #canvas:-moz-full-screen {
-    width: 100%;
-    height: 100%;
-  }
+  width: 100%;
+  height: 100%;
+}
 
-  #canvas:-webkit-full-screen {
-    width: 100%;
-    height: 100%;
-  }
+#canvas:-webkit-full-screen {
+  width: 100%;
+  height: 100%;
+}
 
-  #canvas:-ms-fullscreen {
-    width: 100%;
-    height: 100%;
-  }
+#canvas:-ms-fullscreen {
+  width: 100%;
+  height: 100%;
+}
 
-  #canvas:fullscreen {
-    width: 100%;
-    height: 100%;
-  }
+#canvas:fullscreen {
+  width: 100%;
+  height: 100%;
+}
 
-  #presetSelect {
-    max-width: 300px;
-  }
+#presetSelect {
+  /* width:100% */
+}
 
-  #presetCycleLength {
-    width: 50px;
-  }
+#presetCycleLength {
+  width: 50px;
+}
+
+.navigation {
+  display: flex;
+  padding: 6px;
+  align-items: center;
+}
+
+.navigation > * {
+  margin-right: 6px;
+}
+
+.select-area {
+  padding: 6px;
+}
