@@ -1,3 +1,9 @@
+# this fork adds branch feature/preset-docs 
+- ui to create documentation for milkdrop-preset playing different music
+- e.g. run "http-server . " in root directory, open folder preset-docs
+ 
+
+
 # Butterchurn
 
 Butterchurn is a WebGL implementation of the Milkdrop Visualizer
