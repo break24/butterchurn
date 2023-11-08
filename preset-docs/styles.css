@@ -46,4 +46,16 @@
 
 #audio-select {
   flex-grow: 1;
+  cursor: pointer;
+}
+#canvas {
+  /* width: 640px;
+  height: 360px; */
+  width: 1280px;
+  height: 720px;
+}
+
+#mainWrapper {
+  max-width: 1600px;
+  margin: auto;
 }
