@@ -180,12 +180,12 @@ addEventListener("DOMContentLoaded", (event) => {
         docEl.webkitRequestFullscreen();
       } else if (docEl.mozRequestFullScreen) {
         docEl.mozRequestFullScreen();
-      } // Careful to the capital S
+      } 
       else if (docEl.msRequestFullscreen) {
         docEl.msRequestFullscreen();
       } else if (docEl.webkitEnterFullscreen) {
         docEl.webkitEnterFullscreen();
-      } // Magic is here for iOS
+      } 
     }
 
     window.$("#presetSelect").change((evt) => {
