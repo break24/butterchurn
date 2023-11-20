@@ -1,4 +1,4 @@
-import { testPreset } from "./presets/test.js";
+import { testPreset } from "./modules/test.js";
 
 addEventListener("DOMContentLoaded", (event) => {
   window.$(function () {
@@ -16,6 +16,7 @@ addEventListener("DOMContentLoaded", (event) => {
     // defaults
     var presetCycle = false;
     var presetCycleLength = 15000;
+    var blendTime = 2;
     var presetRandom = false;
     const canvasWidth = 1280;
     const canvasHight = 720;
@@ -117,7 +118,9 @@ addEventListener("DOMContentLoaded", (event) => {
     }
 
     //#region set presets
-    function nextPreset(blendTime = 0.7) {
+    function nextPreset(blendTimePara) {
+      const usedBlendTime =
+        blendTimePara !== undefined ? blendTimePara : blendTime;
       presetIndexHist.push(presetIndex);
 
       var numPresets = presetKeys.length;
@@ -126,22 +129,29 @@ addEventListener("DOMContentLoaded", (event) => {
       } else {
         presetIndex = (presetIndex + 1) % numPresets;
       }
-      setPreset(blendTime);
+      setPreset(usedBlendTime);
     }
 
-    function prevPreset(blendTime = 5.7) {
+    function prevPreset(blendTimePara) {
+      const usedBlendTime =
+        blendTimePara !== undefined ? blendTimePara : blendTime;
+
+      presetIndexHist.push(presetIndex);
       var numPresets = presetKeys.length;
       if (presetIndexHist.length > 0) {
         presetIndex = presetIndexHist.pop();
       } else {
         presetIndex = (presetIndex - 1 + numPresets) % numPresets;
       }
-      setPreset(blendTime);
+      setPreset(usedBlendTime);
     }
 
-    const setPreset = (blendTime) => {
+    const setPreset = (blendTimePara) => {
+      const usedBlendTime =
+        blendTimePara !== undefined ? blendTimePara : blendTime;
+
       document.title = presetKeys[presetIndex];
-      visualizer.loadPreset(presets[presetKeys[presetIndex]], blendTime);
+      visualizer.loadPreset(presets[presetKeys[presetIndex]], usedBlendTime);
 
       // console.log(presets[presetKeys[presetIndex]]);
 
@@ -155,14 +165,34 @@ addEventListener("DOMContentLoaded", (event) => {
       }
 
       if (presetCycle) {
-        cycleInterval = setInterval(() => nextPreset(2.7), presetCycleLength);
+        cycleInterval = setInterval(() => nextPreset(), presetCycleLength);
       }
     }
+
+    function fullscreen() {
+      const docEl = document.getElementById("canvas");
+      if (!docEl) {
+        return;
+      }
+      if (docEl.requestFullscreen) {
+        docEl.requestFullscreen();
+      } else if (docEl.webkitRequestFullscreen) {
+        docEl.webkitRequestFullscreen();
+      } else if (docEl.mozRequestFullScreen) {
+        docEl.mozRequestFullScreen();
+      } // Careful to the capital S
+      else if (docEl.msRequestFullscreen) {
+        docEl.msRequestFullscreen();
+      } else if (docEl.webkitEnterFullscreen) {
+        docEl.webkitEnterFullscreen();
+      } // Magic is here for iOS
+    }
+
     window.$("#presetSelect").change((evt) => {
       presetIndexHist.push(presetIndex);
       presetIndex = parseInt(window.$("#presetSelect").val());
 
-      setPreset(5.7);
+      setPreset();
     });
 
     window.$("#presetCycle").change(() => {
@@ -182,6 +212,15 @@ addEventListener("DOMContentLoaded", (event) => {
     window.$("#presetRandom").change(() => {
       presetRandom = window.$("#presetRandom").is(":checked");
     });
+
+    window.$("#canvas").dblclick(() => {
+      fullscreen();
+    });
+
+    window.$("#blendTimeId").change((evt) => {
+      blendTime = parseInt(window.$("#blendTimeId").val());
+    });
+
     //#endregion
 
     //#region keys
@@ -192,6 +231,8 @@ addEventListener("DOMContentLoaded", (event) => {
         prevPreset();
       } else if (e.which === 72) {
         nextPreset(0);
+      } else if (e.which === 13) {
+        fullscreen();
       }
     });
     //#endregion
