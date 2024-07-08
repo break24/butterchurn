@@ -1,7 +1,7 @@
 const path = require("path");
 
 const root = path.join(__dirname, ".");
-const nodeRoot = path.join(__dirname,"..", "node_modules");
+const nodeRoot = path.join(__dirname, "..", "node_modules");
 const outputPath = path.join(__dirname, "presets");
 
 const config = {
@@ -11,7 +11,7 @@ const config = {
   output: {
     path: outputPath,
     filename: "[name]",
-    library: "[name]ButterchurnPresets",
+    library: "[name]-encrpt",
     libraryTarget: "umd",
     umdNamedDefine: true,
   },

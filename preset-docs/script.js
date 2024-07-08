@@ -11,6 +11,7 @@ addEventListener("DOMContentLoaded", (event) => {
     var presets = {};
     var presetKeys = [];
     var presetIndexHist = [];
+    var presetIndexHistCursor = 0;
     var canvas = document.getElementById("canvas");
 
     // defaults
@@ -107,10 +108,11 @@ addEventListener("DOMContentLoaded", (event) => {
 
           // console.log(index, fileName, formatSeconds(buf.duration));
 
+          const duration = buf.duration * 1000;
           timeoutId = setTimeout(() => {
             index = audioFiles.length > index + 1 ? index + 1 : 0;
             loadLocalFiles(index);
-          }, buf.duration * 1000);
+          }, duration);
         });
       };
 
@@ -121,14 +123,22 @@ addEventListener("DOMContentLoaded", (event) => {
     function nextPreset(blendTimePara) {
       const usedBlendTime =
         blendTimePara !== undefined ? blendTimePara : blendTime;
-      presetIndexHist.push(presetIndex);
-
-      var numPresets = presetKeys.length;
       if (presetRandom) {
-        presetIndex = Math.floor(Math.random() * presetKeys.length);
+        if (presetIndexHistCursor + 1 == presetIndexHist.length) {
+          // reset to zero
+          presetIndexHistCursor = 0;
+        } else {
+          presetIndexHistCursor++;
+        }
       } else {
-        presetIndex = (presetIndex + 1) % numPresets;
+        if (presetIndex + 1 == presetKeys.length) {
+          // reset to zero
+          presetIndex = 0;
+        } else {
+          presetIndex++;
+        }
       }
+
       setPreset(usedBlendTime);
     }
 
@@ -136,12 +146,18 @@ addEventListener("DOMContentLoaded", (event) => {
       const usedBlendTime =
         blendTimePara !== undefined ? blendTimePara : blendTime;
 
-      presetIndexHist.push(presetIndex);
-      var numPresets = presetKeys.length;
-      if (presetIndexHist.length > 0) {
-        presetIndex = presetIndexHist.pop();
+      if (presetRandom) {
+        if (presetIndexHistCursor > 0) {
+          presetIndexHistCursor--;
+        } else {
+          presetIndexHistCursor = presetIndexHist.length - 1;
+        }
       } else {
-        presetIndex = (presetIndex - 1 + numPresets) % numPresets;
+        if (presetIndex > 0) {
+          presetIndex--;
+        } else {
+          presetIndex = presetKeys.length - 1;
+        }
       }
       setPreset(usedBlendTime);
     }
@@ -152,6 +168,15 @@ addEventListener("DOMContentLoaded", (event) => {
 
       document.title = presetKeys[presetIndex];
       visualizer.loadPreset(presets[presetKeys[presetIndex]], usedBlendTime);
+
+      if (presetRandom) {
+        if (presetIndexHistCursor === presetIndexHist.length + 1) {
+          presetIndex = Math.floor(Math.random() * presetKeys.length);
+          presetIndexHist.push(presetIndex);
+        } else {
+          presetIndex = presetIndexHist[presetIndexHistCursor];
+        }
+      }
 
       // console.log(presets[presetKeys[presetIndex]]);
 
@@ -180,16 +205,14 @@ addEventListener("DOMContentLoaded", (event) => {
         docEl.webkitRequestFullscreen();
       } else if (docEl.mozRequestFullScreen) {
         docEl.mozRequestFullScreen();
-      } 
-      else if (docEl.msRequestFullscreen) {
+      } else if (docEl.msRequestFullscreen) {
         docEl.msRequestFullscreen();
       } else if (docEl.webkitEnterFullscreen) {
         docEl.webkitEnterFullscreen();
-      } 
+      }
     }
 
     window.$("#presetSelect").change((evt) => {
-      presetIndexHist.push(presetIndex);
       presetIndex = parseInt(window.$("#presetSelect").val());
 
       setPreset();
@@ -211,6 +234,8 @@ addEventListener("DOMContentLoaded", (event) => {
 
     window.$("#presetRandom").change(() => {
       presetRandom = window.$("#presetRandom").is(":checked");
+      presetIndexHist = [];
+      presetIndexHistCursor = 0;
     });
 
     window.$("#canvas").dblclick(() => {
@@ -291,7 +316,7 @@ addEventListener("DOMContentLoaded", (event) => {
       // const presetKey = "butterchurnPresets";
       // const presetKey = "butterchurnPresetsExtra";
       // const presetKey = "imageButterchurnPresets";
-      const presetKey = "baseButterchurnPresets";
+      const presetKey = "base-encrpt";
       if (window[presetKey]) {
         Object.assign(presets, window[presetKey].default);
       }
